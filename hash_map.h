@@ -7,18 +7,20 @@
 
 template<class KeyType, class ValueType, class Hash = std::hash<KeyType> >
 class HashMap {
+ public:
+    using ElemType = typename std::pair<const KeyType, ValueType>;
+    using iterator = typename std::list<ElemType>::iterator;
+    using const_iterator = typename std::list<ElemType>::const_iterator;
+
  private:
     size_t elem_count;
     size_t capacity;
     Hash hasher;
-    std::list<std::pair<const KeyType, ValueType>> elements;
-    std::vector<typename std::list<std::pair<const KeyType, ValueType>>::iterator> buckets;
+    std::list<ElemType> elements;
+    std::vector<iterator> buckets;
     std::vector<size_t> buckets_size;
 
  public:
-    using iterator = typename std::list<std::pair<const KeyType, ValueType>>::iterator;
-    using const_iterator = typename std::list<std::pair<const KeyType, ValueType>>::const_iterator;
-
     HashMap() {
         elem_count = 0;
         capacity = 1;
@@ -55,31 +57,31 @@ class HashMap {
         }
     }
 
-    HashMap(std::initializer_list<std::pair<const KeyType, ValueType>> l) {
+    HashMap(std::initializer_list<ElemType> init_list) {
         elem_count = 0;
-        capacity = l.size();
+        capacity = init_list.size();
         buckets.resize(capacity);
         buckets_size.resize(capacity);
         for (size_t i = 0; i < capacity; ++i) {
             buckets[i] = elements.end();
             buckets_size[i] = 0;
         }
-        for (auto it : l) {
+        for (auto it : init_list) {
             insert(it);
         }
     }
 
-    HashMap(std::initializer_list<std::pair<const KeyType, ValueType>> l,
+    HashMap(std::initializer_list<ElemType> init_list,
             const Hash& set_hasher) : hasher(set_hasher)  {
         elem_count = 0;
-        capacity = l.size();
+        capacity = init_list.size();
         buckets.resize(capacity);
         buckets_size.resize(capacity);
         for (size_t i = 0; i < capacity; ++i) {
             buckets[i] = elements.end();
             buckets_size[i] = 0;
         }
-        for (auto it : l) {
+        for (auto it : init_list) {
             insert(it);
         }
     }
@@ -157,7 +159,7 @@ class HashMap {
             buckets[i] = elements.end();
             buckets_size[i] = 0;
         }
-        std::list<std::pair<const KeyType, ValueType>> old_list;
+        std::list<ElemType> old_list;
         for (iterator it = elements.begin(); it != elements.end(); ++it) {
             old_list.push_back(*it);
         }
@@ -169,7 +171,7 @@ class HashMap {
         old_list.clear();
     }
 
-    void insert(std::pair<const KeyType, ValueType> elem) {
+    void insert(ElemType elem) {
         if (need_rebuild()) {
             rebuild();
         }
